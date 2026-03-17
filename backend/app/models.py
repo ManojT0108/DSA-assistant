@@ -16,12 +16,19 @@ class TagResult(BaseModel):
     reasoning: str
 
 
+class Approach(BaseModel):
+    name: str
+    explanation: str
+
+
 class Editorial(BaseModel):
     intuition: str
-    approach: list[str]
+    visual_walkthrough: str
+    approaches: list[Approach]
     time_complexity: str
     space_complexity: str
     code: str
+    edge_cases: list[str]
 
 
 class EditorialResponse(BaseModel):

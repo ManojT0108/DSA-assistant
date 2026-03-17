@@ -4,13 +4,10 @@ import { Editorial } from "@/types";
 import PatternPills from "./PatternPills";
 import CodeBlock from "./CodeBlock";
 import "katex/dist/katex.min.css";
-
-// Dynamic import to avoid SSR issues with KaTeX
 import { InlineMath } from "react-katex";
 
 function ComplexityBadge({ label, value }: { label: string; value: string }) {
-  // Try to render LaTeX, fallback to plain text
-  const latexMatch = value.match(/^(O\(.+\))\s*[-—–]\s*(.+)$/);
+  const latexMatch = value.match(/^(.+?)\s*[-—–]\s*(.+)$/);
   const complexityPart = latexMatch ? latexMatch[1] : value;
   const explanation = latexMatch ? latexMatch[2] : null;
 
@@ -31,6 +28,31 @@ function ComplexityBadge({ label, value }: { label: string; value: string }) {
   );
 }
 
+function MarkdownBlock({ content }: { content: string }) {
+  // Render code blocks and basic markdown formatting
+  const parts = content.split(/(```[\s\S]*?```)/g);
+  return (
+    <div className="space-y-3 text-gray-300 leading-relaxed">
+      {parts.map((part, i) => {
+        if (part.startsWith("```")) {
+          const code = part.replace(/^```\w*\n?/, "").replace(/\n?```$/, "");
+          return (
+            <pre key={i} className="rounded-lg bg-gray-800/60 p-4 text-sm font-mono overflow-x-auto whitespace-pre">
+              {code}
+            </pre>
+          );
+        }
+        if (!part.trim()) return null;
+        return (
+          <div key={i} className="whitespace-pre-wrap">
+            {part}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 interface EditorialPaneProps {
   patterns: string[];
   editorial: Editorial;
@@ -42,17 +64,29 @@ export default function EditorialPane({ patterns, editorial }: EditorialPaneProp
       <PatternPills patterns={patterns} />
 
       <section>
-        <h3 className="mb-2 text-lg font-semibold text-[#6c63ff]">Intuition</h3>
-        <p className="text-gray-300 leading-relaxed">{editorial.intuition}</p>
+        <h3 className="mb-2 text-lg font-semibold text-[#6c63ff]">Intuition &amp; The &quot;Aha!&quot; Moment</h3>
+        <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{editorial.intuition}</p>
       </section>
 
       <section>
-        <h3 className="mb-2 text-lg font-semibold text-[#6c63ff]">Approach</h3>
-        <ol className="list-decimal list-inside space-y-2 text-gray-300">
-          {editorial.approach.map((step, i) => (
-            <li key={i} className="leading-relaxed">{step}</li>
+        <h3 className="mb-2 text-lg font-semibold text-[#6c63ff]">Visual Walkthrough</h3>
+        <MarkdownBlock content={editorial.visual_walkthrough} />
+      </section>
+
+      <section>
+        <h3 className="mb-3 text-lg font-semibold text-[#6c63ff]">Approaches</h3>
+        <div className="space-y-4">
+          {editorial.approaches.map((approach, i) => (
+            <div key={i} className="rounded-lg border border-gray-800 p-4">
+              <h4 className="mb-2 font-semibold text-gray-200">
+                {i + 1}. {approach.name}
+              </h4>
+              <p className="text-gray-400 leading-relaxed whitespace-pre-wrap">
+                {approach.explanation}
+              </p>
+            </div>
           ))}
-        </ol>
+        </div>
       </section>
 
       <section>
@@ -66,6 +100,18 @@ export default function EditorialPane({ patterns, editorial }: EditorialPaneProp
       <section>
         <h3 className="mb-3 text-lg font-semibold text-[#6c63ff]">Solution</h3>
         <CodeBlock code={editorial.code} />
+      </section>
+
+      <section>
+        <h3 className="mb-3 text-lg font-semibold text-[#6c63ff]">Edge Cases &amp; Pitfalls</h3>
+        <ul className="space-y-2">
+          {editorial.edge_cases.map((ec, i) => (
+            <li key={i} className="flex gap-2 text-gray-400">
+              <span className="text-amber-400 shrink-0">&#x26a0;</span>
+              <span>{ec}</span>
+            </li>
+          ))}
+        </ul>
       </section>
     </div>
   );
