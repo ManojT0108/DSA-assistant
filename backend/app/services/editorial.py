@@ -61,13 +61,15 @@ Show how pointers move or how the stack/queue changes over 2-3 key iterations. U
    - For optimized approaches, explain the optimization clearly. What redundant work are we removing? \
      Build on why the previous approach falls short.
 
-4. **time_complexity** — Use LaTeX notation (e.g., \\mathcal{{O}}(N), \\mathcal{{O}}(N \\log N)). \
-Break down what part of the code drives the complexity.
+4. **time_complexity** — A SHORT one-line summary only, e.g., "O(M * N) — two passes over the grid". \
+Do NOT use LaTeX. Do NOT write multiple paragraphs. Just the Big-O and a brief justification in one sentence.
 
-5. **space_complexity** — Same LaTeX format. Explain what data structures contribute to space usage.
+5. **space_complexity** — Same format: one short line, e.g., "O(M * N) — two prefix sum arrays". \
+No LaTeX, no paragraphs.
 
-6. **code** — A clean, well-commented Python 3 solution. Use descriptive variable names. \
-Avoid "clever" one-liners that sacrifice readability.
+6. **code** — Provide clean, well-commented solutions in ALL five languages: \
+Python, JavaScript, Java, C++, and Go. Use descriptive variable names. \
+Avoid "clever" one-liners that sacrifice readability. Each solution should be idiomatic to the language.
 
 7. **edge_cases** — List 2-3 specific scenarios (e.g., empty input, large constraints, negative values, \
 single element) and briefly explain how the solution handles them.

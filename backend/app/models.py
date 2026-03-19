@@ -21,13 +21,21 @@ class Approach(BaseModel):
     explanation: str
 
 
+class CodeSolutions(BaseModel):
+    python: str
+    javascript: str
+    java: str
+    cpp: str
+    go: str
+
+
 class Editorial(BaseModel):
     intuition: str
     visual_walkthrough: str
     approaches: list[Approach]
     time_complexity: str
     space_complexity: str
-    code: str
+    code: CodeSolutions
     edge_cases: list[str]
 
 

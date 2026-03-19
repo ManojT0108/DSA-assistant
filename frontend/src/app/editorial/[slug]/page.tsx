@@ -31,26 +31,29 @@ export default function EditorialPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="flex items-center gap-4 border-b border-gray-800 px-6 py-3">
+      <header className="flex items-center gap-4 border-b border-zinc-800 px-6 py-3">
         <Link
           href="/"
-          className="text-lg font-bold text-gray-100 hover:text-[#6c63ff] transition-colors"
+          className="text-sm font-semibold text-zinc-100 hover:text-white transition-colors"
         >
           Find My Editorial
         </Link>
         {data && (
-          <span className="text-sm text-gray-500">
-            {data.problem.title}
-          </span>
+          <>
+            <span className="text-zinc-700">/</span>
+            <span className="text-sm text-zinc-500">
+              {data.problem.title}
+            </span>
+          </>
         )}
       </header>
 
       {error && (
-        <div className="mx-auto mt-12 max-w-lg rounded-lg bg-rose-900/20 p-6 text-center text-rose-300">
-          <p className="mb-4">{error}</p>
+        <div className="mx-auto mt-16 max-w-md rounded-lg border border-rose-500/20 bg-rose-500/5 p-6 text-center">
+          <p className="mb-4 text-sm text-rose-400">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="rounded-lg bg-rose-600 px-4 py-2 text-sm text-white hover:bg-rose-700 transition-colors"
+            className="rounded-md border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm text-zinc-300 hover:border-zinc-500 hover:text-zinc-100 transition-colors"
           >
             Retry
           </button>
@@ -58,14 +61,14 @@ export default function EditorialPage() {
       )}
 
       {loading && (
-        <div className="grid flex-1 grid-cols-1 lg:grid-cols-2 divide-x divide-gray-800">
+        <div className="grid flex-1 grid-cols-1 lg:grid-cols-2 divide-x divide-zinc-800">
           <LoadingSkeleton />
           <LoadingSkeleton />
         </div>
       )}
 
       {data && !loading && (
-        <div className="grid flex-1 grid-cols-1 lg:grid-cols-2 divide-x divide-gray-800">
+        <div className="grid flex-1 grid-cols-1 lg:grid-cols-2 divide-x divide-zinc-800">
           <ProblemPane problem={data.problem} />
           <EditorialPane patterns={data.patterns} editorial={data.editorial} />
         </div>
