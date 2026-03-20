@@ -1,41 +1,170 @@
 @import "tailwindcss";
 
+/* Dark theme (default) */
 :root {
-  --background: #09090b;
-  --foreground: #fafafa;
-  --surface: #18181b;
-  --surface-hover: #27272a;
-  --border: #27272a;
-  --muted: #a1a1aa;
-  --accent: #6c63ff;
+  --bg-primary: #222831;
+  --bg-secondary: #393E46;
+  --bg-elevated: #2d3340;
+  --accent: #00ADB5;
+  --accent-hover: #00c4cc;
+  --accent-dim: rgba(0, 173, 181, 0.08);
+  --text-primary: #EEEEEE;
+  --text-secondary: #a0a8b4;
+  --text-muted: #6b7380;
+  --border: #393E46;
+  --border-hover: #4a5260;
+  --code-bg: #1a1f29;
+
+  color-scheme: dark;
+}
+
+/* Light theme */
+[data-theme="light"] {
+  --bg-primary: #f8f9fb;
+  --bg-secondary: #ffffff;
+  --bg-elevated: #f0f2f5;
+  --accent: #00868d;
+  --accent-hover: #006d73;
+  --accent-dim: rgba(0, 134, 141, 0.06);
+  --text-primary: #222831;
+  --text-secondary: #5a6270;
+  --text-muted: #8b929c;
+  --border: #e2e5ea;
+  --border-hover: #ccd0d6;
+  --code-bg: #f0f2f5;
+
+  color-scheme: light;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
-/* Scrollbar styling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
+  height: 5px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #3f3f46;
+  background: var(--border);
   border-radius: 3px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: #52525b;
+  background: var(--border-hover);
+}
+
+/* Problem content — style LeetCode raw HTML, force wrapping */
+.problem-content {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  overflow: hidden;
+}
+.problem-content p {
+  margin-bottom: 0.75rem;
+}
+.problem-content strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.problem-content em {
+  color: var(--text-secondary);
+}
+.problem-content a {
+  color: var(--accent);
+}
+.problem-content code {
+  color: var(--accent);
+  font-size: 0.8125rem;
+  background: var(--bg-elevated);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+}
+.problem-content pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  overflow: hidden;
+  max-width: 100%;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  margin: 0.75rem 0;
+}
+.problem-content ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+.problem-content ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+.problem-content li {
+  margin-bottom: 0.25rem;
+}
+.problem-content img {
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  border-radius: 0.5rem;
+  display: block;
+  margin: 0.5rem 0;
+}
+.problem-content h1,
+.problem-content h2,
+.problem-content h3,
+.problem-content h4 {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+.problem-content sup {
+  font-size: 0.7em;
+}
+/* Catch-all: nothing escapes */
+.problem-content * {
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in-text {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.35s ease-out forwards;
+}
+.animate-fade-text {
+  animation: fade-in-text 0.4s ease-out forwards;
 }

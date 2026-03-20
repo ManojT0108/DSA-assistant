@@ -1,33 +1,37 @@
-const COOKIE_KEY = "fme_notes";
+const COOKIE_KEY = "fme_completed";
 
-function getAllNotes(): Record<string, string> {
-  if (typeof document === "undefined") return {};
+function getAll(): Set<string> {
+  if (typeof document === "undefined") return new Set();
   const match = document.cookie.match(new RegExp(`(?:^|; )${COOKIE_KEY}=([^;]*)`));
-  if (!match) return {};
+  if (!match) return new Set();
   try {
-    return JSON.parse(decodeURIComponent(match[1]));
+    return new Set(JSON.parse(decodeURIComponent(match[1])));
   } catch {
-    return {};
+    return new Set();
   }
 }
 
-function saveAllNotes(notes: Record<string, string>) {
-  const encoded = encodeURIComponent(JSON.stringify(notes));
-  // Cookie expires in 1 year
+function saveAll(completed: Set<string>) {
+  const encoded = encodeURIComponent(JSON.stringify([...completed]));
   const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
   document.cookie = `${COOKIE_KEY}=${encoded}; expires=${expires}; path=/; SameSite=Lax`;
 }
 
-export function getNote(slug: string): string {
-  return getAllNotes()[slug] || "";
+export function isCompleted(slug: string): boolean {
+  return getAll().has(slug);
 }
 
-export function setNote(slug: string, note: string) {
-  const notes = getAllNotes();
-  if (note.trim()) {
-    notes[slug] = note.trim();
+export function toggleCompleted(slug: string): boolean {
+  const completed = getAll();
+  if (completed.has(slug)) {
+    completed.delete(slug);
   } else {
-    delete notes[slug];
+    completed.add(slug);
   }
-  saveAllNotes(notes);
+  saveAll(completed);
+  return completed.has(slug);
+}
+
+export function getCompletedCount(): number {
+  return getAll().size;
 }

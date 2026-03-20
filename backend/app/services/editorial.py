@@ -51,9 +51,11 @@ Your response must follow this strict structure:
 required to solve it. Why does the identified pattern (e.g., Sliding Window, Dynamic Programming) fit here? \
 Be encouraging and clear.
 
-2. **visual_walkthrough** — Provide a step-by-step ASCII diagram or a markdown table tracing a sample input. \
-Show how pointers move or how the stack/queue changes over 2-3 key iterations. Use markdown formatting \
-(code blocks for ASCII art, tables where appropriate).
+2. **visual_walkthrough** — Write a clear, narrative text walkthrough tracing a sample input step by step. \
+Describe how variables, pointers, or data structures change at each iteration in plain English sentences. \
+Use numbered steps like "Step 1: ...", "Step 2: ..." etc. Use inline code (`backticks`) for variable values. \
+Do NOT use markdown tables. Do NOT use ASCII art diagrams. Keep it purely as readable, flowing text \
+that someone can follow along like a story.
 
 3. **approaches** — Provide multiple approaches, from naive to optimal:
    - Each approach needs a short descriptive name (e.g., "Brute Force", "Optimized with Hash Map").

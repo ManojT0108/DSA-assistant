@@ -1,65 +1,53 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Problem } from "@/lib/blind75";
-import { getNote, setNote } from "@/lib/notes";
+import { isCompleted, toggleCompleted } from "@/lib/notes";
+import { getTopicStyle } from "@/lib/topicColors";
 
-const DIFFICULTY_BADGE = {
-  Easy: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  Medium: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  Hard: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+const DIFFICULTY_DOT = {
+  Easy: "bg-emerald-400",
+  Medium: "bg-amber-400",
+  Hard: "bg-rose-400",
 };
 
-function NoteCell({ slug }: { slug: string }) {
-  const [note, setNoteState] = useState("");
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState("");
+const DIFFICULTY_TEXT = {
+  Easy: "text-emerald-400",
+  Medium: "text-amber-400",
+  Hard: "text-rose-400",
+};
+
+function Checkbox({ slug, onChange }: { slug: string; onChange: () => void }) {
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    setNoteState(getNote(slug));
+    setChecked(isCompleted(slug));
   }, [slug]);
-
-  function save() {
-    setNote(slug, draft);
-    setNoteState(draft.trim());
-    setEditing(false);
-  }
-
-  if (editing) {
-    return (
-      <div className="flex gap-1.5">
-        <input
-          autoFocus
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") save();
-            if (e.key === "Escape") setEditing(false);
-          }}
-          className="w-full min-w-0 rounded border border-zinc-600 bg-zinc-800 px-2 py-1 text-xs text-zinc-300 outline-none focus:border-zinc-400"
-          placeholder="Add a note..."
-        />
-        <button
-          onClick={save}
-          className="shrink-0 rounded bg-zinc-200 px-2 py-1 text-xs font-medium text-zinc-900 hover:bg-white"
-        >
-          Save
-        </button>
-      </div>
-    );
-  }
 
   return (
     <button
       onClick={() => {
-        setDraft(note);
-        setEditing(true);
+        const next = toggleCompleted(slug);
+        setChecked(next);
+        onChange();
       }}
-      className="w-full text-left text-xs text-zinc-600 hover:text-zinc-400 transition-colors truncate"
-      title={note || "Click to add a note"}
+      className="group flex items-center justify-center"
+      aria-label={checked ? "Mark incomplete" : "Mark complete"}
     >
-      {note || "—"}
+      <div
+        className={`h-[18px] w-[18px] rounded-[5px] border-2 flex items-center justify-center transition-all ${
+          checked
+            ? "border-[var(--accent)] bg-[var(--accent)]"
+            : "border-[var(--border-hover)] bg-transparent group-hover:border-[var(--accent)]"
+        }`}
+      >
+        {checked && (
+          <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        )}
+      </div>
     </button>
   );
 }
@@ -67,7 +55,7 @@ function NoteCell({ slug }: { slug: string }) {
 function ChevronIcon({ open }: { open: boolean }) {
   return (
     <svg
-      className={`h-4 w-4 text-zinc-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+      className={`h-4 w-4 text-[var(--text-muted)] transition-transform duration-200 ${open ? "rotate-0" : "-rotate-90"}`}
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -90,80 +78,102 @@ export default function ProblemTable({
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const [completedCount, setCompletedCount] = useState(0);
+
+  const recalcCount = useCallback(() => {
+    setCompletedCount(problems.filter((p) => isCompleted(p.slug)).length);
+  }, [problems]);
+
+  useEffect(() => {
+    recalcCount();
+  }, [recalcCount]);
+
+  const progress = problems.length > 0 ? (completedCount / problems.length) * 100 : 0;
 
   return (
-    <section>
-      {/* Collapsible header */}
+    <section className="animate-fade-in">
+      {/* Header */}
       <button
         onClick={() => setOpen(!open)}
-        className="mb-3 flex w-full items-center gap-3 text-left group"
+        className="mb-3 flex w-full items-center gap-3 text-left"
       >
         <ChevronIcon open={open} />
-        <span className="text-base font-semibold text-zinc-100">{title}</span>
-        <span
-          className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${DIFFICULTY_BADGE[difficulty]}`}
-        >
-          {problems.length}
+        <div className={`h-2.5 w-2.5 rounded-full ${DIFFICULTY_DOT[difficulty]}`} />
+        <span className="text-sm font-semibold text-[var(--text-primary)]">{title}</span>
+        <span className="text-xs text-[var(--text-muted)]">
+          {completedCount}/{problems.length}
         </span>
+        {/* Progress bar */}
+        <div className="ml-auto hidden h-1 w-20 overflow-hidden rounded-full bg-[var(--border)] sm:block">
+          <div
+            className={`h-full rounded-full ${DIFFICULTY_DOT[difficulty]} transition-all duration-500`}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
       </button>
 
-      {/* Collapsible content */}
+      {/* Table */}
       {open && (
-        <div className="overflow-x-auto rounded-lg border border-zinc-800">
+        <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-800 bg-zinc-900/80 text-left">
-                <th className="w-16 px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
-                  #
-                </th>
-                <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
-                  Problem
-                </th>
-                <th className="hidden px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500 md:table-cell">
-                  Topics
-                </th>
-                <th className="w-24 px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-zinc-500">
-                  Editorial
-                </th>
-                <th className="w-48 px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500 hidden lg:table-cell">
-                  Notes
-                </th>
+              <tr className="border-b border-[var(--border)] text-left">
+                <th className="w-10 px-3 py-3" />
+                <th className="w-14 px-3 py-3 text-[11px] font-medium uppercase tracking-widest text-[var(--text-muted)]">#</th>
+                <th className="px-3 py-3 text-[11px] font-medium uppercase tracking-widest text-[var(--text-muted)]">Problem</th>
+                <th className="hidden w-20 px-3 py-3 text-[11px] font-medium uppercase tracking-widest text-[var(--text-muted)] sm:table-cell">Diff.</th>
+                <th className="hidden w-16 px-3 py-3 text-[11px] font-medium uppercase tracking-widest text-[var(--text-muted)] sm:table-cell">Acc.</th>
+                <th className="hidden px-3 py-3 text-[11px] font-medium uppercase tracking-widest text-[var(--text-muted)] lg:table-cell">Topics</th>
+                <th className="w-20 px-3 py-3" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-800/50">
-              {problems.map((p) => (
+            <tbody>
+              {problems.map((p, i) => (
                 <tr
                   key={p.id}
-                  className="transition-colors hover:bg-zinc-800/30"
+                  className={`group border-b border-[var(--border)]/40 last:border-0 hover:bg-[var(--accent-dim)] transition-colors ${
+                    i % 2 !== 0 ? "bg-[var(--bg-primary)]/30" : ""
+                  }`}
                 >
-                  <td className="px-4 py-3 font-mono text-xs text-zinc-600">
-                    {p.id}
+                  <td className="px-3 py-2.5 text-center">
+                    <Checkbox slug={p.slug} onChange={recalcCount} />
                   </td>
-                  <td className="px-4 py-3">
-                    <span className="text-zinc-200 text-sm">{p.title}</span>
+                  <td className="px-3 py-2.5 font-mono text-xs text-[var(--text-muted)]">{p.id}</td>
+                  <td className="px-3 py-2.5">
+                    <Link
+                      href={`/editorial/${p.slug}`}
+                      className="text-sm text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
+                    >
+                      {p.title}
+                    </Link>
                   </td>
-                  <td className="hidden px-4 py-3 md:table-cell">
-                    <div className="flex flex-wrap gap-1.5">
+                  <td className="hidden px-3 py-2.5 sm:table-cell">
+                    <span className={`text-xs font-medium ${DIFFICULTY_TEXT[p.difficulty]}`}>
+                      {p.difficulty}
+                    </span>
+                  </td>
+                  <td className="hidden px-3 py-2.5 sm:table-cell">
+                    <span className="text-xs text-[var(--text-muted)]">{p.acceptance}%</span>
+                  </td>
+                  <td className="hidden px-3 py-2.5 lg:table-cell">
+                    <div className="flex flex-wrap gap-1">
                       {p.topics.map((t) => (
                         <span
                           key={t}
-                          className="rounded-md border border-zinc-700/50 bg-zinc-800/50 px-2 py-0.5 text-xs text-zinc-400"
+                          className={`rounded-md border px-1.5 py-0.5 text-[10px] font-medium ${getTopicStyle(t)}`}
                         >
                           {t}
                         </span>
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-3 py-2.5">
                     <Link
                       href={`/editorial/${p.slug}`}
-                      className="inline-block rounded-md border border-zinc-700 bg-zinc-800 px-3 py-1 text-xs font-medium text-zinc-300 hover:border-zinc-500 hover:text-zinc-100 transition-colors"
+                      className="inline-block rounded-md border border-[var(--border)] px-2.5 py-1 text-[11px] font-medium text-[var(--text-muted)] opacity-0 group-hover:opacity-100 hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all"
                     >
-                      View
+                      Solve
                     </Link>
-                  </td>
-                  <td className="hidden px-4 py-3 lg:table-cell">
-                    <NoteCell slug={p.slug} />
                   </td>
                 </tr>
               ))}
