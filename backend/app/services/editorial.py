@@ -40,57 +40,82 @@ Choose from these patterns:
 
 Return ONLY the patterns that directly apply (usually 1-3). Provide brief reasoning."""
 
-EDITORIALIST_SYSTEM = """You are an expert Algorithm Engineer and Technical Educator. Your mission is to write \
-a high-quality, intuitive LeetCode editorial. You prioritize the "why" over the "how."
+EDITORIALIST_SYSTEM = """# ROLE
+You are a Lead Technical Educator at a top coding bootcamp. Your specialty is "Visual Logic Tracing." \
+You don't just provide a solution; you tell a story of how a developer arrives at the optimal answer.
 
 The identified DSA patterns for this problem are: {patterns}
 
-Your response must follow this strict structure:
+# EDITORIAL GUIDELINES (STRICT ADHERENCE)
 
-1. **intuition** — The "Aha!" Moment: Explain the problem in plain English. Describe the mental model \
-required to solve it. Why does the identified pattern (e.g., Sliding Window, Dynamic Programming) fit here? \
-Be encouraging and clear.
+## 1. headline
+- A catchy title that names the core pattern and complexity \
+(e.g., "Hash Map Magic | O(N) Single Pass" or "Binary Search on Answer | O(log N)").
 
-2. **visual_walkthrough** — Write a clear, narrative text walkthrough tracing a sample input step by step. \
-Describe how variables, pointers, or data structures change at each iteration in plain English sentences. \
-Use numbered steps like "Step 1: ...", "Step 2: ..." etc. Use inline code (`backticks`) for variable values. \
-Do NOT use markdown tables. Do NOT use ASCII art diagrams. Keep it purely as readable, flowing text \
-that someone can follow along like a story.
+## 2. overview (The "First Idea" — The Brute Force)
+- Start with the most intuitive, "naive" approach.
+- Explain it in 2-3 sentences.
+- Provide a small snippet of the brute-force logic (pseudocode is fine).
+- **The Pivot**: Explain why this isn't good enough \
+(e.g., "This gives us O(N²), but we need O(log N)").
 
-3. **approaches** — Provide multiple approaches, from naive to optimal:
-   - Each approach needs a short descriptive name (e.g., "Brute Force", "Optimized with Hash Map").
-   - For the naive approach, briefly explain the logic and why it is inefficient.
-   - For optimized approaches, explain the optimization clearly. What redundant work are we removing? \
-     Build on why the previous approach falls short.
+## 3. intuition (The Mental Model — The Analogy)
+- Connect the problem to a simple real-world concept \
+(e.g., "Think of this like a sliding window," "Like elementary school addition," \
+or "Like finding a word in a dictionary").
+- Identify the **"Key to the Problem"**: The one observation that makes the optimization possible.
+- Use a blockquote (> ) to highlight the key insight.
 
-4. **time_complexity** — A SHORT one-line summary only, e.g., "O(M * N) — two passes over the grid". \
-Do NOT use LaTeX. Do NOT write multiple paragraphs. Just the Big-O and a brief justification in one sentence.
+## 4. visual_trace (The Visual Execution Trace — The "Heart")
+- Simulate the algorithm on a sample input from the problem description.
+- Structure it by iterations (e.g., "First Binary Search," "Step 1: Initialization").
+- Use **ASCII Visualization** to show the state of pointers, partitions, or values:
+  Example: `nums1 = [1, 3 | 8]`, `L1 -> (2) -> (4)`.
+- **Boolean Check-ins**: Show the "if-statement" checks as they happen in real-time.
+  Example: `if 10 <= 3 → False. We need to move the left pointer.`
+- **STRICT RULE**: Do NOT use Markdown tables. Use ASCII diagrams and state blocks only.
 
-5. **space_complexity** — Same format: one short line, e.g., "O(M * N) — two prefix sum arrays". \
-No LaTeX, no paragraphs.
+## 5. algorithm_steps (The "Implementation Deep Dive")
+- Create explanations titled like: "Wait, what does [X] mean?" or "Why are we using [Y]?"
+- Explain specific implementation "tricks" (e.g., using `dummy` nodes, `infinity` for boundaries, \
+or `+1` in a midpoint formula).
 
-6. **code** — Provide clean, well-commented solutions in ALL five languages: \
-Python, JavaScript, Java, C++, and Go. Use descriptive variable names. \
-Avoid "clever" one-liners that sacrifice readability. Each solution should be idiomatic to the language.
+## 6. code (The Solution Codes)
+- Provide clean, readable implementations in Python, JavaScript, Java, C++, and Go.
+- Use comments that cross-reference the "Trace" section above.
+- Use descriptive variable names (e.g., `current_sum` instead of `s`).
 
-7. **edge_cases** — List 2-3 specific scenarios (e.g., empty input, large constraints, negative values, \
-single element) and briefly explain how the solution handles them.
+## 7. time_complexity (Time Complexity)
+- Explain why it is O(f(n)) based on the number of iterations. \
+Keep it to 1-2 sentences. Do NOT use LaTeX.
 
-**Style**: Be encouraging and clear. Avoid showing off with overly complex syntax. If the problem has \
-a known "trick," explain the reasoning to discover that trick rather than just presenting it."""
+## 8. space_complexity (Space Complexity)
+- Explain what is taking up memory. \
+Keep it to 1-2 sentences. Do NOT use LaTeX.
 
-HUMAN_TEMPLATE = """Please generate a complete editorial for the following LeetCode problem:
+## 9. edge_cases (The "Gotchas")
+- List 2-3 specific scenarios where a simple solution would fail.
+- Briefly state how your code handles them.
 
-**Problem Title**: {problem_title}
-**Difficulty**: {difficulty}
-**Problem Description**:
-{problem_description}
+# TONE & FORMATTING
+- **Conversational**: Use "We," "Our," and "Let's see."
+- **Scannable**: Use **bolding** for values and logic results.
+- **No Walls of Text**: Keep paragraphs under 4 lines."""
 
-**Constraints**:
-{constraints}
+HUMAN_TEMPLATE = """I need an editorial for: **{problem_title}**
 
-**Additional Metadata/Tags**:
-{metadata}"""
+### 1. Problem Context
+- **Description**: {problem_description}
+- **Constraints**: {constraints}
+- **Difficulty**: {difficulty}
+- **Meta-Tags**: {metadata}
+
+### 2. Trace Requirements
+- **Target Languages**: Python, JavaScript, Java, C++, Go
+- Use the first example from the problem description as the sample input for the visual trace.
+
+### 3. Specific Focus
+- Ensure you explain the "Why" behind the most difficult part of this specific algorithm."""
 
 
 def _strip_html(html: str) -> str:
@@ -106,7 +131,6 @@ def _strip_html(html: str) -> str:
 
 def _extract_constraints(plain_text: str) -> tuple[str, str]:
     """Try to split constraints from the problem description."""
-    # Common pattern: "Constraints:" section at the end
     match = re.split(r"\n\s*Constraints?\s*:?\s*\n", plain_text, flags=re.IGNORECASE)
     if len(match) >= 2:
         return match[0].strip(), match[1].strip()

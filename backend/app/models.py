@@ -16,11 +16,6 @@ class TagResult(BaseModel):
     reasoning: str
 
 
-class Approach(BaseModel):
-    name: str
-    explanation: str
-
-
 class CodeSolutions(BaseModel):
     python: str
     javascript: str
@@ -30,13 +25,15 @@ class CodeSolutions(BaseModel):
 
 
 class Editorial(BaseModel):
+    headline: str
+    overview: str
     intuition: str
-    visual_walkthrough: str
-    approaches: list[Approach]
+    visual_trace: str
+    algorithm_steps: str
+    code: CodeSolutions
     time_complexity: str
     space_complexity: str
-    code: CodeSolutions
-    edge_cases: list[str]
+    edge_cases: str
 
 
 class EditorialResponse(BaseModel):

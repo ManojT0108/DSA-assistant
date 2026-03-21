@@ -21,60 +21,71 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 export default function EditorialPane({ patterns, editorial }: EditorialPaneProps) {
   return (
     <div className="p-6 space-y-8 text-base text-[var(--text-secondary)]">
+      {/* Headline */}
+      <section>
+        <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">
+          {editorial.headline}
+        </h2>
+      </section>
+
       <PatternPills patterns={patterns} />
 
+      {/* The First Idea (Brute Force) */}
       <section>
-        <SectionHeading>Intuition</SectionHeading>
+        <SectionHeading>The First Idea</SectionHeading>
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4">
+          <Markdown content={editorial.overview} />
+        </div>
+      </section>
+
+      {/* Mental Model */}
+      <section>
+        <SectionHeading>The Mental Model</SectionHeading>
         <Markdown content={editorial.intuition} />
       </section>
 
+      {/* Visual Trace */}
       <section>
-        <SectionHeading>Visual Walkthrough</SectionHeading>
-        <Markdown content={editorial.visual_walkthrough} />
-      </section>
-
-      <section>
-        <SectionHeading>Approaches</SectionHeading>
-        <div className="space-y-3">
-          {editorial.approaches.map((approach, i) => (
-            <div key={i} className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4">
-              <h4 className="mb-2 text-base font-semibold text-[var(--text-primary)]">
-                {i + 1}. {approach.name}
-              </h4>
-              <Markdown content={approach.explanation} />
-            </div>
-          ))}
+        <SectionHeading>Visual Execution Trace</SectionHeading>
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--code-bg)] p-4 overflow-x-auto">
+          <Markdown content={editorial.visual_trace} />
         </div>
       </section>
 
+      {/* Implementation Deep Dive */}
       <section>
-        <SectionHeading>Complexity</SectionHeading>
-        <div className="flex flex-wrap gap-3">
-          <div className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-2.5">
-            <span className="text-sm font-medium text-[var(--text-muted)]">Time</span>
-            <span className="font-mono text-sm text-[var(--text-primary)]">{editorial.time_complexity}</span>
-          </div>
-          <div className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-2.5">
-            <span className="text-sm font-medium text-[var(--text-muted)]">Space</span>
-            <span className="font-mono text-sm text-[var(--text-primary)]">{editorial.space_complexity}</span>
-          </div>
+        <SectionHeading>Implementation Deep Dive</SectionHeading>
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4">
+          <Markdown content={editorial.algorithm_steps} />
         </div>
       </section>
 
+      {/* Code */}
       <section>
         <SectionHeading>Solution</SectionHeading>
         <CodeTabs code={editorial.code} />
       </section>
 
+      {/* Complexity */}
       <section>
-        <SectionHeading>Edge Cases</SectionHeading>
-        <div className="space-y-2">
-          {editorial.edge_cases.map((ec, i) => (
-            <div key={i} className="flex gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3">
-              <span className="shrink-0 text-amber-400 text-sm mt-0.5">!</span>
-              <div><Markdown content={ec} /></div>
-            </div>
-          ))}
+        <SectionHeading>Complexity Analysis</SectionHeading>
+        <div className="space-y-3">
+          <div className="flex gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3">
+            <span className="shrink-0 text-sm font-semibold text-[var(--accent)]">Time</span>
+            <span className="text-sm text-[var(--text-primary)]">{editorial.time_complexity}</span>
+          </div>
+          <div className="flex gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3">
+            <span className="shrink-0 text-sm font-semibold text-[var(--accent)]">Space</span>
+            <span className="text-sm text-[var(--text-primary)]">{editorial.space_complexity}</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Edge Cases */}
+      <section>
+        <SectionHeading>The "Gotchas"</SectionHeading>
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4">
+          <Markdown content={editorial.edge_cases} />
         </div>
       </section>
     </div>

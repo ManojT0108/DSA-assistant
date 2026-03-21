@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 
 from app import cache
 from app.models import EditorialResponse
+from app.routes.solve import _parse_rate_limit_error
 from app.services.editorial import generate_editorial
 from app.services.leetcode import fetch_daily_slug, fetch_problem
 
@@ -27,6 +28,9 @@ async def daily():
     try:
         tag_result, editorial = await generate_editorial(problem)
     except Exception as exc:
+        rate_limit = _parse_rate_limit_error(exc)
+        if rate_limit:
+            raise rate_limit
         raise HTTPException(status_code=502, detail=f"Failed to generate editorial: {exc}")
 
     response = EditorialResponse(

@@ -8,11 +8,6 @@ export interface LeetCodeProblem {
   hints: string[];
 }
 
-export interface Approach {
-  name: string;
-  explanation: string;
-}
-
 export interface CodeSolutions {
   python: string;
   javascript: string;
@@ -22,13 +17,15 @@ export interface CodeSolutions {
 }
 
 export interface Editorial {
+  headline: string;
+  overview: string;
   intuition: string;
-  visual_walkthrough: string;
-  approaches: Approach[];
+  visual_trace: string;
+  algorithm_steps: string;
+  code: CodeSolutions;
   time_complexity: string;
   space_complexity: string;
-  code: CodeSolutions;
-  edge_cases: string[];
+  edge_cases: string;
 }
 
 export interface EditorialResponse {
