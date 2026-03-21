@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: find-my-editorial
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash-lite
+      - key: CORS_ORIGINS
+        value: '["http://localhost:3000"]'

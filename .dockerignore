@@ -1,0 +1,10 @@
+**/node_modules
+**/.next
+**/out
+**/.venv
+**/__pycache__
+**/*.pyc
+backend/.env
+**/.ruff_cache
+**/.vercel
+.git
