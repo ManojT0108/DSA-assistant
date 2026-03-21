@@ -8,10 +8,7 @@ A free, developer-centric AI LeetCode Editorial Engine that generates pattern-ba
 - **Multi-Language Solutions** — Clean, annotated code in Python, JavaScript, Java, C++, and Go, displayed in a tabbed interface with custom syntax highlighting.
 - **DSA Pattern Tagging** — Automatically classifies problems into algorithmic patterns (Two Pointers, Sliding Window, DP, Backtracking, etc.) before generating the editorial.
 - **Blind 75 & NeetCode 150** — Homepage features both curated problem lists with a dropdown selector, organized by difficulty with collapsible sections.
-- **Progress Tracking** — Checkbox-based completion tracking per problem, persisted via cookies (no account needed).
 - **Daily Challenge** — One-click access to today's LeetCode daily challenge editorial.
-- **Smart Error Handling** — Rate limit errors show a dedicated UI with countdown timer, retry button, and actionable suggestions.
-- **Dark / Light Theme** — Toggle between themes, persisted to localStorage.
 - **In-Memory Caching** — Previously generated editorials are cached to avoid redundant LLM calls.
 
 ## Tech Stack
