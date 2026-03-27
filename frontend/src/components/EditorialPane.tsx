@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Editorial } from "@/types";
 import PatternPills from "./PatternPills";
 import CodeTabs from "./CodeTabs";
@@ -15,6 +16,44 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
     <h3 className="mb-3 text-sm font-semibold uppercase tracking-widest text-[var(--accent)]">
       {children}
     </h3>
+  );
+}
+
+function SolutionDropdown({ code }: { code: Editorial["code"] }) {
+  const [revealed, setRevealed] = useState(false);
+
+  return (
+    <section>
+      <button
+        onClick={() => setRevealed(!revealed)}
+        className="w-full flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 transition-colors hover:border-[var(--accent)]/40 group"
+      >
+        <h3 className="text-sm font-semibold uppercase tracking-widest text-[var(--accent)]">
+          Solution
+        </h3>
+        <div className="flex items-center gap-2">
+          {!revealed && (
+            <span className="text-xs text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors">
+              Try it yourself first!
+            </span>
+          )}
+          <svg
+            className={`h-4 w-4 text-[var(--text-muted)] transition-transform ${revealed ? "rotate-180" : ""}`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </button>
+      {revealed && (
+        <div className="mt-3 animate-fade-in">
+          <CodeTabs code={code} />
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -60,11 +99,8 @@ export default function EditorialPane({ patterns, editorial }: EditorialPaneProp
         </div>
       </section>
 
-      {/* Code */}
-      <section>
-        <SectionHeading>Solution</SectionHeading>
-        <CodeTabs code={editorial.code} />
-      </section>
+      {/* Code — collapsible */}
+      <SolutionDropdown code={editorial.code} />
 
       {/* Complexity */}
       <section>

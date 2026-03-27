@@ -1,7 +1,7 @@
 import re
 
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 
 from app.config import settings
 from app.models import Editorial, LeetCodeProblem, TagResult
@@ -137,23 +137,19 @@ def _extract_constraints(plain_text: str) -> tuple[str, str]:
     return plain_text, "See problem description above."
 
 
-def _get_llm() -> ChatGoogleGenerativeAI:
-    return ChatGoogleGenerativeAI(
-        model=settings.gemini_model,
-        google_api_key=settings.google_api_key,
+def _get_llm() -> ChatOpenAI:
+    return ChatOpenAI(
+        model=settings.openai_model,
+        api_key=settings.openai_api_key,
         temperature=0.3,
     )
 
 
-async def generate_editorial(problem: LeetCodeProblem) -> tuple[TagResult, Editorial]:
+async def run_tagger(problem: LeetCodeProblem) -> TagResult:
+    """Tag a problem with DSA patterns. Standalone so it can be reused by other endpoints."""
     llm = _get_llm()
     plain_text = _strip_html(problem.question)
-    description, constraints = _extract_constraints(plain_text)
 
-    tags_str = ", ".join(t.get("name", "") for t in problem.topicTags if t.get("name"))
-    metadata = tags_str if tags_str else "None"
-
-    # Step 1: Tag the problem with DSA patterns
     tagger_prompt = ChatPromptTemplate.from_messages([
         ("system", TAGGER_SYSTEM),
         ("human", "Problem: {title}\n\n{description}"),
@@ -163,6 +159,25 @@ async def generate_editorial(problem: LeetCodeProblem) -> tuple[TagResult, Edito
         "title": problem.title,
         "description": plain_text,
     })
+    return tag_result
+
+
+async def generate_editorial(problem: LeetCodeProblem) -> tuple[TagResult, Editorial]:
+    from app import cache as app_cache
+
+    llm = _get_llm()
+    plain_text = _strip_html(problem.question)
+    description, constraints = _extract_constraints(plain_text)
+
+    tags_str = ", ".join(t.get("name", "") for t in problem.topicTags if t.get("name"))
+    metadata = tags_str if tags_str else "None"
+
+    # Step 1: Tag the problem with DSA patterns (use cache)
+    cache_key = f"tags:{problem.titleSlug}"
+    tag_result = app_cache.get_tags(cache_key)
+    if not tag_result:
+        tag_result = await run_tagger(problem)
+        app_cache.put_tags(cache_key, tag_result)
 
     # Step 2: Generate the editorial with patterns context
     editorial_prompt = ChatPromptTemplate.from_messages([

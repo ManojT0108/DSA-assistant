@@ -7,6 +7,7 @@ import { fetchEditorial, fetchDailyEditorial, RateLimitError } from "@/lib/api";
 import { EditorialResponse } from "@/types";
 import ProblemPane from "@/components/ProblemPane";
 import EditorialPane from "@/components/EditorialPane";
+import CodeAssistantPane from "@/components/CodeAssistantPane";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -25,6 +26,7 @@ export default function EditorialPage() {
   const [error, setError] = useState<ErrorState | null>(null);
   const [loading, setLoading] = useState(true);
   const [countdown, setCountdown] = useState(0);
+  const [activeTab, setActiveTab] = useState<'editorial' | 'assistant'>('editorial');
 
   useEffect(() => {
     setLoading(true);
@@ -176,8 +178,41 @@ export default function EditorialPage() {
           <div className="overflow-y-auto overflow-x-hidden min-w-0">
             <ProblemPane problem={data.problem} />
           </div>
-          <div className="overflow-y-auto overflow-x-hidden min-w-0">
-            <EditorialPane patterns={data.patterns} editorial={data.editorial} />
+          <div className="flex flex-col overflow-hidden min-w-0">
+            <div className="sticky top-0 z-10 flex gap-2 border-b border-[var(--border)] bg-[var(--bg-primary)] px-6 pt-4 shrink-0">
+              <button
+                onClick={() => setActiveTab('editorial')}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                  activeTab === 'editorial'
+                    ? 'border-b-2 border-[var(--accent)] text-[var(--accent)]'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                Editorial
+              </button>
+              <button
+                onClick={() => setActiveTab('assistant')}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                  activeTab === 'assistant'
+                    ? 'border-b-2 border-[var(--accent)] text-[var(--accent)]'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                Code Assistant
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+              <div className={activeTab === 'editorial' ? '' : 'hidden'}>
+                <EditorialPane patterns={data.patterns} editorial={data.editorial} />
+              </div>
+              <div className={activeTab === 'assistant' ? '' : 'hidden'}>
+                <CodeAssistantPane
+                  slug={slug}
+                  problemTitle={data.problem.title}
+                  patterns={data.patterns}
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -39,7 +39,7 @@ _HEADERS = {
     "Referer": "https://leetcode.com",
 }
 
-_client = httpx.AsyncClient(timeout=30.0, headers=_HEADERS)
+_client = httpx.AsyncClient(timeout=60.0, headers=_HEADERS)
 
 MAX_RETRIES = 3
 BACKOFF_SECONDS = [2, 5, 10]
