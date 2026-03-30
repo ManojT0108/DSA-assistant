@@ -1,21 +1,38 @@
-# Find My Editorial
+# DSA Assistant
 
-A free, developer-centric AI LeetCode Editorial Engine that generates pattern-based interview prep content. Bypasses paywalled solutions with AI-generated editorials featuring visual execution traces, brute-force-to-optimal breakdowns, and multi-language implementations.
+A free, developer-centric AI LeetCode Editorial Engine that generates pattern-based interview prep content. Bypasses paywalled solutions with AI-generated editorials featuring visual execution traces, brute-force-to-optimal breakdowns, and multi-language implementations — plus an AI-powered Code Assistant and tiered hint system to help you learn, not just copy answers.
+
+> Originally forked from [Find My Editorial](https://github.com/n1tishc/find-my-editorial) by Nitish Chandrashekar, extended with Code Assistant, Tiered Hints, Follow-up Chat, and UX improvements.
 
 ## Features
 
-- **AI-Powered Editorials** — Generates detailed editorials using Google Gemini with a "Visual Logic Tracing" approach: brute force analysis, mental model analogies, ASCII execution traces, implementation deep dives, and complexity analysis.
+### Core (from original project)
+- **AI-Powered Editorials** — Generates detailed editorials using a "Visual Logic Tracing" approach: brute force analysis, mental model analogies, ASCII execution traces, implementation deep dives, and complexity analysis.
 - **Multi-Language Solutions** — Clean, annotated code in Python, JavaScript, Java, C++, and Go, displayed in a tabbed interface with custom syntax highlighting.
 - **DSA Pattern Tagging** — Automatically classifies problems into algorithmic patterns (Two Pointers, Sliding Window, DP, Backtracking, etc.) before generating the editorial.
 - **Blind 75 & NeetCode 150** — Homepage features both curated problem lists with a dropdown selector, organized by difficulty with collapsible sections.
 - **Daily Challenge** — One-click access to today's LeetCode daily challenge editorial.
 - **In-Memory Caching** — Previously generated editorials are cached to avoid redundant LLM calls.
 
+### New Features
+- **Code Assistant Tab** — Paste your code, select a mode (Debug or Continue), and get AI-powered help. "Debug My Code" uses a Socratic approach — it explains what's wrong without giving you the answer. "Continue My Code" helps you finish incomplete solutions step by step. Powered by Claude Haiku.
+- **Follow-up Chat** — After getting a response from the Code Assistant, ask follow-up questions in a conversational thread. The AI remembers the full context so you don't have to re-explain anything.
+- **Tiered Hint System** — Three progressive hint levels that nudge you toward the answer without giving it away:
+  - **Level 1 — Conceptual Nudge**: Guides your thinking without naming any algorithm or data structure.
+  - **Level 2 — Pattern Hint**: Names the DSA pattern and explains why it fits.
+  - **Level 3 — Implementation Hint**: Gives a concrete detail (key variable, key check) without writing code.
+
+  Each level unlocks only after the previous one is revealed. Hints are cached so re-clicking doesn't fire new API calls.
+- **Collapsible Solution** — The solution code in the Editorial tab is hidden behind a dropdown that says "Try it yourself first!" — encouraging users to attempt the problem before peeking.
+- **LeetCode Links** — Every problem in the Blind 75 / NeetCode 150 tables has an external link icon that opens the problem directly on LeetCode.
+- **Sticky Tabs + State Persistence** — The Editorial / Code Assistant tab bar stays pinned at the top of the right pane. Switching tabs preserves all state (code, chat history, hints, AI responses).
+- **Auto-Retry + Timeout Handling** — Frontend automatically retries failed requests once before showing an error, with increased proxy and client timeouts to handle slow LLM responses.
+
 ## Tech Stack
 
 | Layer | Tech |
 |---|---|
-| Backend | Python, FastAPI, LangChain, Google Gemini |
+| Backend | Python, FastAPI, LangChain, OpenAI, Anthropic (Claude Haiku) |
 | Frontend | Next.js (App Router), TypeScript, Tailwind CSS |
 | LeetCode Data | LeetCode GraphQL API (direct) |
 | Code Highlighting | react-syntax-highlighter |
@@ -25,7 +42,7 @@ A free, developer-centric AI LeetCode Editorial Engine that generates pattern-ba
 ## Project Structure
 
 ```
-find-my-editorial/
+DSA-assistant/
 ├── Dockerfile              # Multi-stage: builds frontend + backend into one image
 ├── render.yaml             # Render deployment config
 ├── backend/
@@ -38,29 +55,35 @@ find-my-editorial/
 │       ├── cache.py                # In-memory dict cache
 │       ├── services/
 │       │   ├── leetcode.py         # LeetCode GraphQL client (with retry/backoff)
-│       │   └── editorial.py        # LangChain two-step chain (tagger → editorialist)
+│       │   ├── editorial.py        # LangChain two-step chain (tagger → editorialist)
+│       │   ├── assistant.py        # Claude Haiku code assistant (debug/continue modes)
+│       │   └── hint.py             # Claude Haiku tiered hint generator
 │       └── routes/
 │           ├── daily.py            # GET /daily
-│           └── solve.py            # POST /solve/{slug} (with rate-limit detection)
+│           ├── solve.py            # POST /solve/{slug} (with rate-limit detection)
+│           ├── assist.py           # POST /assist/{slug} (code assistant)
+│           └── hint.py             # POST /hint/{slug} (tiered hints)
 └── frontend/
     ├── next.config.ts              # Standalone output + /api/* rewrite to backend
     └── src/
         ├── app/
         │   ├── page.tsx                    # Home — search, daily, Blind 75 / NeetCode 150
         │   ├── globals.css                 # Dark/light theme CSS variables
-        │   └── editorial/[slug]/page.tsx   # Split-pane editorial view
+        │   └── editorial/[slug]/page.tsx   # Split-pane view with tab switcher
         ├── components/
         │   ├── SearchBar.tsx               # Search by slug or LeetCode URL
-        │   ├── ProblemTable.tsx            # Collapsible table with checkboxes & progress
+        │   ├── ProblemTable.tsx            # Collapsible table with checkboxes, progress & LeetCode links
         │   ├── ProblemPane.tsx             # Left pane: original problem (sanitized HTML)
-        │   ├── EditorialPane.tsx           # Right pane: AI editorial sections
+        │   ├── EditorialPane.tsx           # Right pane: AI editorial with collapsible solution
+        │   ├── CodeAssistantPane.tsx       # Code Assistant tab: debug/continue + follow-up chat
+        │   ├── HintPanel.tsx              # Progressive 3-level hint UI
         │   ├── CodeTabs.tsx                # Multi-language tabbed code viewer
         │   ├── Markdown.tsx                # Markdown renderer with syntax highlighting
         │   ├── PatternPills.tsx            # Colored DSA pattern tags
         │   ├── LoadingSkeleton.tsx         # Animated loading state with progress ring
         │   └── ThemeToggle.tsx             # Dark/light theme switcher
         ├── lib/
-        │   ├── api.ts                      # Backend fetch helpers + RateLimitError
+        │   ├── api.ts                      # Backend fetch helpers + auto-retry + RateLimitError
         │   ├── utils.ts                    # Slug extraction from URLs
         │   ├── blind75.ts                  # Blind 75 problem data
         │   ├── neetcode150.ts              # NeetCode 150 problem data
@@ -75,7 +98,8 @@ find-my-editorial/
 
 - Python 3.11+
 - Node.js 18+
-- A [Google Gemini API key](https://aistudio.google.com/apikey)
+- An [OpenAI API key](https://platform.openai.com/api-keys)
+- An [Anthropic API key](https://console.anthropic.com/) (for Code Assistant & Hints)
 
 ### Local Development
 
@@ -87,7 +111,7 @@ cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
-cp .env.example .env   # Add your GOOGLE_API_KEY
+cp .env.example .env   # Add your OPENAI_API_KEY and ANTHROPIC_API_KEY
 uvicorn app.main:app --reload --port 8000
 
 # Terminal 2 — Frontend
@@ -103,11 +127,11 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 Run the entire app in a single container:
 
 ```bash
-docker build -t find-my-editorial .
+docker build -t dsa-assistant .
 docker run -p 3000:3000 \
-  -e GOOGLE_API_KEY=your-key-here \
-  -e GEMINI_MODEL=gemini-2.5-flash-lite \
-  find-my-editorial
+  -e OPENAI_API_KEY=your-openai-key \
+  -e ANTHROPIC_API_KEY=your-anthropic-key \
+  dsa-assistant
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
@@ -119,7 +143,7 @@ The project ships with a `Dockerfile` and `render.yaml` for one-click deployment
 1. Push the repo to GitHub.
 2. Go to [render.com](https://render.com) → **New** → **Web Service**.
 3. Connect your GitHub repo — Render auto-detects the `render.yaml`.
-4. Add the `GOOGLE_API_KEY` environment variable.
+4. Add the `OPENAI_API_KEY` and `ANTHROPIC_API_KEY` environment variables.
 5. Click **Deploy**.
 
 The Docker image bundles both services into a single container:
@@ -127,7 +151,7 @@ The Docker image bundles both services into a single container:
 - **FastAPI** runs on port 8000 (internal only) and handles all API logic.
 - **Supervisor** manages both processes.
 
-> **Note**: Render's free tier spins down after 15 minutes of inactivity. The first request after idle takes ~30s to cold-start. After that, responses are instant (except LLM generation which takes 10-15s).
+> **Note**: Render's free tier spins down after 15 minutes of inactivity. The first request after idle takes ~30-60s to cold-start. After that, responses are instant (except LLM generation which takes 10-15s).
 
 ## API Endpoints
 
@@ -136,6 +160,8 @@ The Docker image bundles both services into a single container:
 | `GET` | `/health` | Health check |
 | `GET` | `/daily` | Generate editorial for today's daily challenge |
 | `POST` | `/solve/{slug}` | Generate editorial for a problem by slug |
+| `POST` | `/assist/{slug}` | Code assistant — debug or continue user's code |
+| `POST` | `/hint/{slug}` | Tiered hint — level 1, 2, or 3 |
 
 All endpoints return structured JSON. Rate-limited requests return a `429` with retry timing and actionable suggestions.
 
@@ -143,10 +169,10 @@ All endpoints return structured JSON. Rate-limited requests return a `429` with 
 
 | Variable | Location | Description |
 |---|---|---|
-| `GOOGLE_API_KEY` | `backend/.env` / Render env | Google Gemini API key |
-| `GEMINI_MODEL` | `backend/.env` / Render env | Gemini model name (default: `gemini-2.5-flash-lite`) |
+| `OPENAI_API_KEY` | `backend/.env` / Render env | OpenAI API key (for editorial generation) |
+| `OPENAI_MODEL` | `backend/.env` / Render env | OpenAI model name (default: `gpt-4o`) |
+| `ANTHROPIC_API_KEY` | `backend/.env` / Render env | Anthropic API key (for Code Assistant & Hints) |
 | `CORS_ORIGINS` | `backend/.env` / Render env | Allowed CORS origins |
-| `NEXT_PUBLIC_API_URL` | `frontend/.env.local` | Backend URL for local dev (default: `http://localhost:8000`) |
 | `BACKEND_URL` | Docker / Render | Internal backend URL for Next.js rewrites (default: `http://127.0.0.1:8000`) |
 
 ## How It Works
@@ -156,7 +182,9 @@ All endpoints return structured JSON. Rate-limited requests return a `429` with 
 3. **Tagger chain** classifies the problem into DSA patterns (e.g., "Two Pointers", "Dynamic Programming").
 4. **Editorialist chain** generates a full editorial with the identified patterns as context — including brute force analysis, mental model, ASCII visual trace, implementation deep dive, multi-language code, complexity analysis, and edge cases.
 5. **Frontend renders** the editorial in a split-pane view (problem left, editorial right) with syntax highlighting, pattern pills, and theme support.
-6. **Cache stores** the result in memory so repeated requests for the same problem are instant.
+6. **Code Assistant** lets users paste their code and get Socratic debugging help or step-by-step continuation guidance, with follow-up conversation support.
+7. **Tiered Hints** provide three levels of progressive nudges — from conceptual to implementation-level — without ever giving away the full answer.
+8. **Cache stores** results in memory so repeated requests for the same problem are instant.
 
 ## License
 
