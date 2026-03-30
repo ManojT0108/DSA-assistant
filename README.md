@@ -2,8 +2,6 @@
 
 A free, developer-centric AI LeetCode Editorial Engine that generates pattern-based interview prep content. Bypasses paywalled solutions with AI-generated editorials featuring visual execution traces, brute-force-to-optimal breakdowns, and multi-language implementations — plus an AI-powered Code Assistant and tiered hint system to help you learn, not just copy answers.
 
-> Originally forked from [Find My Editorial](https://github.com/n1tishc/find-my-editorial) by Nitish Chandrashekar, extended with Code Assistant, Tiered Hints, Follow-up Chat, and UX improvements.
-
 ## Features
 
 ### Core (from original project)
